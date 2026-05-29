@@ -4,31 +4,28 @@ import pandas as pd
 # Konfigurasi Halaman
 st.set_page_config(page_title="ImuniScan Digital", page_icon="💉", layout="centered")
 
-# CSS Profesional dengan efek modern
+# CSS Profesional
 st.markdown("""
     <style>
-    .main-container {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        padding: 2rem;
-        border-radius: 20px;
-    }
-    .profile-card {
+    .main-container { background-color: #f0f2f6; }
+    .card {
         background: white;
-        padding: 2rem;
-        border-radius: 20px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        padding: 30px;
+        border-radius: 25px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.08);
         text-align: center;
-        border-top: 8px solid #2ecc71;
+        border: 1px solid #e1e4e8;
     }
-    .profile-icon { font-size: 50px; margin-bottom: 10px; }
-    .name-text { font-size: 1.8rem; font-weight: 800; color: #2c3e50; margin: 0; }
-    .label-text { font-size: 0.9rem; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; margin-top: 15px; }
-    .value-text { font-size: 1.2rem; font-weight: 600; color: #34495e; }
+    .emoji-circle { font-size: 60px; margin-bottom: 15px; }
+    .name-title { font-size: 1.6rem; font-weight: 700; color: #1a1a1a; margin-bottom: 5px; }
+    .label-text { font-size: 0.85rem; color: #888; text-transform: uppercase; letter-spacing: 1.5px; margin-top: 20px; }
+    .value-text { font-size: 1.3rem; font-weight: 600; color: #2d3436; }
     </style>
 """, unsafe_allow_html=True)
 
-st.title("🏥 ImuniScan Pro")
-st.caption("Sistem Informasi Layanan Imunisasi Terintegrasi")
+# Header
+st.markdown("<h1 style='text-align: center;'>ImuniScan Pro</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #636e72;'>Sistem Verifikasi Imunisasi Terintegrasi</p>", unsafe_allow_html=True)
 
 @st.cache_data
 def load_data():
@@ -36,6 +33,10 @@ def load_data():
 
 try:
     df = load_data()
+    
+    # Pembersihan format tanggal saat memuat data (Opsional jika kolom sudah terbaca sebagai datetime)
+    df['Tanggal Lahir'] = pd.to_datetime(df['Tanggal Lahir']).dt.strftime('%d-%m-%Y')
+
     query_params = st.query_params
     id_scan = query_params.get("id", [None])
     
@@ -48,20 +49,19 @@ try:
             nama = hasil.iloc[0]['Nama Bayi']
             tgl_lahir = hasil.iloc[0]['Tanggal Lahir']
             
-            # Tampilan kartu ID digital
+            # Tampilan kartu ID digital yang bersih
             st.markdown(f"""
-                <div class="profile-card">
-                    <div class="profile-icon">👶</div>
-                    <p class="name-text">{nama}</p>
-                    <hr>
+                <div class="card">
+                    <div class="emoji-circle">👶</div>
+                    <div class="name-title">{nama}</div>
                     <div class="label-text">Tanggal Lahir</div>
                     <div class="value-text">{tgl_lahir}</div>
                 </div>
             """, unsafe_allow_html=True)
             
-            st.success("✅ Data Terverifikasi")
+            st.success("✅ Identitas Terverifikasi")
         else:
-            st.error("❌ Data tidak ditemukan.")
+            st.error("❌ Data tidak ditemukan. Pastikan ID benar.")
             
 except Exception as e:
     st.error("Terjadi kendala pada sistem.")
