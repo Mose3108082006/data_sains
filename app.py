@@ -1,11 +1,28 @@
 import streamlit as st
 import pandas as pd
 
-# Styling agar tampilan lebih rapi dan profesional
-st.set_page_config(page_title="Data Imunisasi", page_icon="💉")
+# Konfigurasi Halaman
+st.set_page_config(page_title="ImuniScan - Info Bayi", page_icon="👶")
 
-st.title("💉 Data Imunisasi Bayi")
-st.markdown("---")
+# CSS Kustom untuk tampilan Profesional
+st.markdown("""
+    <style>
+    .card {
+        background-color: #f8f9fa;
+        padding: 25px;
+        border-radius: 15px;
+        border-left: 10px solid #4CAF50;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        margin-top: 20px;
+    }
+    .header-text { color: #2e7d32; font-weight: bold; }
+    .label { font-size: 0.9rem; color: #666; }
+    .value { font-size: 1.4rem; color: #333; font-weight: 600; margin-bottom: 15px; }
+    </style>
+""", unsafe_allow_html=True)
+
+st.title("👶 ImuniScan Digital")
+st.write("Sistem Informasi Imunisasi Terintegrasi")
 
 @st.cache_data
 def load_data():
@@ -13,34 +30,35 @@ def load_data():
 
 try:
     df = load_data()
-
-    # Mengambil ID dari link QR
-    query_params = st.query_params
-    id_dari_link = query_params.get("id", [None])
     
-    if id_dari_link:
-        id_input = id_dari_link
-    else:
-        id_input = st.text_input("🔍 Masukkan ID Bayi:")
+    # Ambil ID dari QR
+    query_params = st.query_params
+    id_scan = query_params.get("id", [None])
+    
+    # Input area
+    id_input = id_scan if id_scan else st.text_input("🔍 Masukkan ID Bayi untuk cek data:")
 
     if id_input:
-        # Pencarian data
         hasil = df[df['No'].astype(str) == str(id_input).strip()]
         
         if not hasil.empty:
-            st.success("✅ Data Berhasil Ditemukan")
+            nama = hasil.iloc[0]['Nama Bayi']
+            tgl_lahir = hasil.iloc[0]['Tanggal Lahir']
             
-            # MENGAMBIL HANYA KOLOM TERTENTU (Sesuaikan nama kolom dengan Excel Anda)
-            # Pastikan nama kolom 'Nama Bayi' dan 'Tanggal Lahir' ada di Excel
-            data_tampil = hasil[['Nama Bayi', 'Tanggal Lahir']]
+            # Tampilan kartu (Card) Profesional
+            st.markdown(f"""
+                <div class="card">
+                    <h3 class="header-text">Informasi Pasien</h3>
+                    <div class="label">Nama Lengkap</div>
+                    <div class="value">{nama}</div>
+                    <div class="label">Tanggal Lahir</div>
+                    <div class="value">{tgl_lahir}</div>
+                </div>
+            """, unsafe_allow_html=True)
             
-            # Menampilkan dengan kartu yang rapi
-            st.markdown("### Informasi Bayi")
-            st.table(data_tampil.reset_index(drop=True))
-            
-            st.info("Informasi lain disembunyikan untuk menjaga privasi.")
+            st.success("Data diverifikasi oleh sistem.")
         else:
-            st.error("❌ ID tidak ditemukan. Periksa kembali ID Anda.")
+            st.error("Data tidak ditemukan.")
             
 except Exception as e:
-    st.error(f"Sistem sedang sibuk: {e}")
+    st.error("Terjadi kendala sistem.")
