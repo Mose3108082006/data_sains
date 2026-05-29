@@ -3,22 +3,33 @@ import pandas as pd
 
 st.title("Sistem Informasi Imunisasi")
 
-# 1. Load data
+# Load data dengan caching agar cepat
 @st.cache_data
 def load_data():
     return pd.read_excel('Data Identitas Bayi dan kehaidran imunisasi.xlsx', skiprows=5)
 
-df = load_data()
+try:
+    df = load_data()
 
-# 2. Input Pencarian
-id_input = st.text_input("Masukkan ID Bayi:")
-
-if id_input:
-    # Cari data
-    hasil = df[df['No'].astype(str) == id_input]
+    # Mengambil ID dari link QR yang di-scan
+    query_params = st.query_params
+    id_dari_link = query_params.get("id", [None])
     
-    if not hasil.empty:
-        st.success("Data Ditemukan!")
-        st.write(hasil) # Menampilkan data bayi
+    # Jika ada ID di link, langsung cari. Jika tidak, tampilkan input box
+    if id_dari_link:
+        id_input = id_dari_link
     else:
-        st.error("ID tidak ditemukan.")
+        id_input = st.text_input("Masukkan ID Bayi:")
+
+    if id_input:
+        # Pencarian data
+        hasil = df[df['No'].astype(str) == str(id_input).strip()]
+        
+        if not hasil.empty:
+            st.success(f"Data Ditemukan untuk ID: {id_input}")
+            st.table(hasil)
+        else:
+            st.error("ID tidak ditemukan.")
+            
+except Exception as e:
+    st.error(f"Error memuat data: {e}")
