@@ -14,15 +14,17 @@ st.markdown("""
         box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         text-align: center;
         border-top: 8px solid #2ecc71;
+        margin-bottom: 20px;
     }
     .emoji-circle { font-size: 50px; margin-bottom: 10px; }
     .name-title { font-size: 1.5rem; font-weight: 800; color: #2c3e50; margin-bottom: 5px; }
     .label-text { font-size: 0.8rem; color: #95a5a6; text-transform: uppercase; letter-spacing: 2px; margin-top: 15px; }
     .value-text { font-size: 1.2rem; font-weight: 600; color: #34495e; }
-    .footer-text { font-size: 0.85rem; color: #555; margin-top: 25px; font-style: italic; }
+    .footer-text { font-size: 0.85rem; color: #555; margin-top: 25px; font-style: italic; border-top: 1px solid #eee; padding-top: 15px; }
     </style>
 """, unsafe_allow_html=True)
 
+# Header
 st.markdown("<h1 style='text-align: center;'>ImuniScan Pro</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: #7f8c8d;'>Sistem Verifikasi Imunisasi Terintegrasi</p>", unsafe_allow_html=True)
 
@@ -42,24 +44,20 @@ try:
         
         if not hasil.empty:
             nama = hasil.iloc[0]['Nama Bayi']
-            jk = hasil.iloc[0]['Jenis Kelamin'] # Pastikan nama kolom di Excel adalah 'Jenis Kelamin'
+            jk = hasil.iloc[0]['Jenis Kelamin']
             
-            # Pembersihan Tanggal
             tgl_mentah = str(hasil.iloc[0]['Tanggal Lahir'])
             tgl_bersih = tgl_mentah.split(' ')[0] 
             
-            # Tampilan kartu
+            # Tampilan Kartu
             st.markdown(f"""
                 <div class="card">
                     <div class="emoji-circle">👶</div>
                     <div class="name-title">{nama}</div>
-                    
                     <div class="label-text">Jenis Kelamin</div>
                     <div class="value-text">{jk}</div>
-                    
                     <div class="label-text">Tanggal Lahir</div>
                     <div class="value-text">{tgl_bersih}</div>
-                    
                     <div class="footer-text">
                         Gunakan data identitas balita ini untuk mengecek bagian monitoring imunisasi di aplikasi utama Anda.
                     </div>
