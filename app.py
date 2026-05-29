@@ -2,27 +2,33 @@ import streamlit as st
 import pandas as pd
 
 # Konfigurasi Halaman
-st.set_page_config(page_title="ImuniScan - Info Bayi", page_icon="👶")
+st.set_page_config(page_title="ImuniScan Digital", page_icon="💉", layout="centered")
 
-# CSS Kustom untuk tampilan Profesional
+# CSS Profesional dengan efek modern
 st.markdown("""
     <style>
-    .card {
-        background-color: #f8f9fa;
-        padding: 25px;
-        border-radius: 15px;
-        border-left: 10px solid #4CAF50;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        margin-top: 20px;
+    .main-container {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding: 2rem;
+        border-radius: 20px;
     }
-    .header-text { color: #2e7d32; font-weight: bold; }
-    .label { font-size: 0.9rem; color: #666; }
-    .value { font-size: 1.4rem; color: #333; font-weight: 600; margin-bottom: 15px; }
+    .profile-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 20px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        text-align: center;
+        border-top: 8px solid #2ecc71;
+    }
+    .profile-icon { font-size: 50px; margin-bottom: 10px; }
+    .name-text { font-size: 1.8rem; font-weight: 800; color: #2c3e50; margin: 0; }
+    .label-text { font-size: 0.9rem; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; margin-top: 15px; }
+    .value-text { font-size: 1.2rem; font-weight: 600; color: #34495e; }
     </style>
 """, unsafe_allow_html=True)
 
-st.title("👶 ImuniScan Digital")
-st.write("Sistem Informasi Imunisasi Terintegrasi")
+st.title("🏥 ImuniScan Pro")
+st.caption("Sistem Informasi Layanan Imunisasi Terintegrasi")
 
 @st.cache_data
 def load_data():
@@ -30,13 +36,10 @@ def load_data():
 
 try:
     df = load_data()
-    
-    # Ambil ID dari QR
     query_params = st.query_params
     id_scan = query_params.get("id", [None])
     
-    # Input area
-    id_input = id_scan if id_scan else st.text_input("🔍 Masukkan ID Bayi untuk cek data:")
+    id_input = id_scan if id_scan else st.text_input("🔍 Masukkan ID Bayi:")
 
     if id_input:
         hasil = df[df['No'].astype(str) == str(id_input).strip()]
@@ -45,20 +48,20 @@ try:
             nama = hasil.iloc[0]['Nama Bayi']
             tgl_lahir = hasil.iloc[0]['Tanggal Lahir']
             
-            # Tampilan kartu (Card) Profesional
+            # Tampilan kartu ID digital
             st.markdown(f"""
-                <div class="card">
-                    <h3 class="header-text">Informasi Pasien</h3>
-                    <div class="label">Nama Lengkap</div>
-                    <div class="value">{nama}</div>
-                    <div class="label">Tanggal Lahir</div>
-                    <div class="value">{tgl_lahir}</div>
+                <div class="profile-card">
+                    <div class="profile-icon">👶</div>
+                    <p class="name-text">{nama}</p>
+                    <hr>
+                    <div class="label-text">Tanggal Lahir</div>
+                    <div class="value-text">{tgl_lahir}</div>
                 </div>
             """, unsafe_allow_html=True)
             
-            st.success("Data diverifikasi oleh sistem.")
+            st.success("✅ Data Terverifikasi")
         else:
-            st.error("Data tidak ditemukan.")
+            st.error("❌ Data tidak ditemukan.")
             
 except Exception as e:
-    st.error("Terjadi kendala sistem.")
+    st.error("Terjadi kendala pada sistem.")
