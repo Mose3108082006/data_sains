@@ -1,76 +1,34 @@
-import streamlit as st
 import pandas as pd
+import qrcode
+import os
 
-# Konfigurasi Halaman
-st.set_page_config(page_title="ImuniScan Digital", page_icon="💉", layout="centered")
+# 1. Load data Excel
+df = pd.read_excel('Data Identitas Bayi dan kehaidran imunisasi.xlsx', skiprows=5)
+FOLDER_QR = 'QR_Codes'
+BASE_URL = "https://datasains.streamlit.app/" 
 
-# CSS Profesional
-st.markdown("""
-    <style>
-    .card {
-        background: white;
-        padding: 30px;
-        border-radius: 25px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        text-align: center;
-        border-top: 8px solid #2ecc71;
-    }
-    .emoji-circle { font-size: 50px; margin-bottom: 10px; }
-    .name-title { font-size: 1.5rem; font-weight: 800; color: #2c3e50; margin-bottom: 5px; }
-    .label-text { font-size: 0.8rem; color: #95a5a6; text-transform: uppercase; letter-spacing: 2px; margin-top: 15px; }
-    .value-text { font-size: 1.2rem; font-weight: 600; color: #34495e; }
-    .row { display: flex; justify-content: space-around; }
-    </style>
-""", unsafe_allow_html=True)
+if not os.path.exists(FOLDER_QR):
+    os.makedirs(FOLDER_QR)
 
-st.markdown("<h1 style='text-align: center;'>ImuniScan Pro</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #7f8c8d;'>Sistem Verifikasi Imunisasi Terintegrasi</p>", unsafe_allow_html=True)
+print("Membuat QR Code unik (berdasarkan ID saja)...")
 
-@st.cache_data
-def load_data():
-    return pd.read_excel('Data Identitas Bayi dan kehaidran imunisasi.xlsx', skiprows=5)
-
-try:
-    df = load_data()
+for index, row in df.iterrows():
+    # Pastikan 'No' di Excel adalah kolom ID Anda
+    id_bayi = str(row['No']).replace('.0', '') # Menghapus .0 jika muncul di ID
     
-    query_params = st.query_params
-    id_dari_link = query_params.get("id", [None])
-    id_input = id_dari_link if id_dari_link else st.text_input("🔍 Masukkan ID Bayi:")
-
-    if id_input:
-        hasil = df[df['No'].astype(str) == str(id_input).strip()]
+    # Lewati jika ID kosong atau tidak valid
+    if id_bayi == 'nan' or id_bayi == 'None':
+        continue
         
-        if not hasil.empty:
-            # Mengambil data (Pastikan nama kolom 'Nama Bayi', 'Tanggal Lahir', 'Jenis Kelamin' sama di Excel)
-            nama = hasil.iloc[0]['Nama Bayi']
-            jk = hasil.iloc[0]['Jenis Kelamin']
-            
-            # Pembersihan Tanggal
-            tgl_mentah = str(hasil.iloc[0]['Tanggal Lahir'])
-            tgl_bersih = tgl_mentah.split(' ')[0] 
-            
-            # Tampilan kartu
-            st.markdown(f"""
-                <div class="card">
-                    <div class="emoji-circle">👶</div>
-                    <div class="name-title">{nama}</div>
-                    
-                    <div class="row">
-                        <div>
-                            <div class="label-text">Jenis Kelamin</div>
-                            <div class="value-text">{jk}</div>
-                        </div>
-                        <div>
-                            <div class="label-text">Tanggal Lahir</div>
-                            <div class="value-text">{tgl_bersih}</div>
-                        </div>
-                    </div>
-                </div>
-            """, unsafe_allow_html=True)
-            
-            st.success("✅ Identitas Terverifikasi")
-        else:
-            st.error("❌ Data tidak ditemukan.")
-            
-except Exception as e:
-    st.error(f"⚠️ Terjadi kesalahan: {e}")
+    # Link unik
+    link_unik = f"{BASE_URL}?id={id_bayi}"
+    
+    # Buat QR
+    img = qrcode.make(link_unik)
+    
+    # Simpan hanya dengan nomor ID
+    nama_file = f"{FOLDER_QR}/QR_{id_bayi}.png"
+    img.save(nama_file)
+    print(f"Berhasil: {nama_file}")
+
+print("\nSelesai! Semua QR Code (berdasarkan nomor ID) sudah siap di folder 'QR_Codes'.")
